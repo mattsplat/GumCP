@@ -16,17 +16,18 @@ $active_page = 'buttons';
 	{
 		$cmd = "sudo chmod -R 777 ".dirname(__FILE__)."/buttons";
 	}
-	
+
 	if(!empty($cmd))
 	{
-		$connection = ssh2_connect('localhost', SSH_PORT);
-		ssh2_auth_password($connection, SSH_USER, SSH_PASS);
-		$stream = ssh2_exec($connection, $cmd);
-		stream_set_blocking($stream, true);
-		$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-		$message .= '<br/><b>Command output:</b><br/>'.nl2br(stream_get_contents($stream_out));
-		
-		ssh2_exec($connection, 'exit');
+//		$connection = ssh2_connect('localhost', SSH_PORT);
+//		ssh2_auth_password($connection, SSH_USER, SSH_PASS);
+//		$stream = ssh2_exec($connection, $cmd);
+//		stream_set_blocking($stream, true);
+//		$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+//		$message .= '<br/><b>Command output:</b><br/>'.nl2br(stream_get_contents($stream_out));
+//
+//		ssh2_exec($connection, 'exit');
+        $message = shell_exec($cmd);
 	}
 
 ?>
@@ -46,37 +47,37 @@ $active_page = 'buttons';
 	<script>
 		$(document).ready(function(){
 			$('[data-toggle="tooltip"]').tooltip();
-			
+
 		});
-		
+
 		function add_button()
 		{
-		
+
 			var html = jQuery('#create-button-dialog').html();
-		
+
 			html += '<div class="dialog-actions text-right margin-top-sm">';
-		
+
 			html += '<div class="form-group pull-right">';
 			html += '<button type="button" class="btn btn-default" onclick="javascript:jQuery(\'#dialog\').modal(\'hide\');">Cancel</button> ';
 			html += ' <button type="button" class="btn btn-default" id="send-message-btn" onclick="javascript:submit_button();jQuery(this).prop(\'disabled\', true);">Send</button>';
 			html += '</div>';
-			
+
 			html += '<div style="clear:both;"></div></div>';
-			
+
 			open_dialog('Add a button', html);
-		
+
 		}
-		
+
 		function submit_button()
 		{
 			jQuery('#send-message-btn').prop('disabled', true);
 			var form_data = $('#dialog .create-button-form').serializeArray();
-			jQuery.ajax({ 
-				type: 'POST', 
-				url: 'ajax.php', 
+			jQuery.ajax({
+				type: 'POST',
+				url: 'ajax.php',
 				data: form_data,
 				dataType:'json',
-				success: function (data) { 
+				success: function (data) {
 					alert(data.message);
 					if(data.type=='success')
 					{
@@ -88,32 +89,32 @@ $active_page = 'buttons';
 					}
 				}
 			});
-			
+
 		}
 		function execute_button(button_id)
 		{
 			jQuery('#button-id-'+button_id).prop('disabled', true);
-			jQuery.ajax({ 
-				type: 'POST', 
-				url: 'ajax.php', 
+			jQuery.ajax({
+				type: 'POST',
+				url: 'ajax.php',
 				data: {'action':'execute_button','button_id':button_id},
 				dataType:'text',
-				success: function (data) { 
+				success: function (data) {
 					alert(data);
 					jQuery('#button-id-'+button_id).prop('disabled', false);
 				}
 			});
-			
+
 		}
 		function edit_button(button_id)
 		{
 			add_button();
-			jQuery.ajax({ 
-				type: 'POST', 
-				url: 'ajax.php', 
+			jQuery.ajax({
+				type: 'POST',
+				url: 'ajax.php',
 				data: {'action':'edit_button','button_id':button_id},
 				dataType:'json',
-				success: function (data) { 
+				success: function (data) {
 					//alert(data);
 					$('#dialog .create-button-form #button_id').val(button_id);
 					$('#dialog .create-button-form #button_command').val(data.button_command);
@@ -123,19 +124,19 @@ $active_page = 'buttons';
 					$('#dialog .create-button-form #button_size option[value="' + data.button_size + '"]').prop('selected', true);
 				}
 			});
-			
+
 		}
 		function delete_button(button_id)
 		{
 			if(confirm("Are you sure you want to delete this button?"))
 			{
 				jQuery('#button-id-'+button_id).prop('disabled', true);
-				jQuery.ajax({ 
-					type: 'POST', 
-					url: 'ajax.php', 
+				jQuery.ajax({
+					type: 'POST',
+					url: 'ajax.php',
 					data: {'action':'delete_button','button_id':button_id},
 					dataType:'json',
-					success: function (data) { 
+					success: function (data) {
 						alert(data.message);
 						if(data.type=='success')
 						{
@@ -148,14 +149,14 @@ $active_page = 'buttons';
 					}
 				});
 			}
-			
+
 		}
 	</script>
 </head>
 
 <body>
 <div class="container">
-	
+
 	<nav class="navbar navbar-default">
 		<div class="container-fluid">
 			<div class="navbar-header">
@@ -177,7 +178,7 @@ $active_page = 'buttons';
 		</div><!--/.container-fluid -->
 	</nav>
 
-	
+
 
 				<button type="button" class="btn btn-default" onclick="javascript:add_button();"><i class="fa fa-plus fa-lg"></i> Add a command button</button>
 
@@ -191,14 +192,14 @@ $active_page = 'buttons';
 							if(!empty($message))
 							{
 								echo '<div class="alert alert-info" role="alert" style="margin-bottom:20px;">'.$message.'</div>';
-							}	
-						
+							}
+
 						if(file_exists('./buttons/buttons.json'))
 						{
 							$contents = file_get_contents('./buttons/buttons.json');
 							$json_arr = json_decode($contents,true);
-							
-								
+
+
 							for($i=0;$i<count($json_arr);$i++)
 							{
 								echo ' <div class="btn-group" role="group" aria-label="...">';
@@ -207,7 +208,7 @@ $active_page = 'buttons';
 								echo '<i class="fa '.$json_arr[$i]['button_icon'].'" aria-hidden="true"></i> ';
 								echo $json_arr[$i]['button_title'];
 								echo '</button>';
-								
+
 								echo '<div class="btn-group" role="group">
 									<button type="button" class="btn btn-default dropdown-toggle '.$json_arr[$i]['button_size'].'" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="caret"></span></button>
 									<ul class="dropdown-menu">
@@ -215,34 +216,34 @@ $active_page = 'buttons';
 										<li><a href="javascript:void(0);" onclick="javascript:delete_button(\''.$i.'\');">Delete</a></li>
 									</ul>
 								</div>';
-								
-								
-								
+
+
+
 								echo '</div> ';
 							}
-								
-							
-						}
-	
-						
-						
-						
-						?>
-						
-						
-						
-					</div>
-				
-				
-				</div>
-				
-				
 
-				
-				
-				
-				
-		
+
+						}
+
+
+
+
+						?>
+
+
+
+					</div>
+
+
+				</div>
+
+
+
+
+
+
+
+
 </div>
 
 <div id="create-button-dialog" style="display: none">

@@ -210,7 +210,7 @@ if (!empty($cmd)) {
 //	$message .= ''.nl2br(stream_get_contents($stream_out));
 //
 //	ssh2_exec($connection, 'exit');
-    $message = system($cmd);
+    $message = shell_exec($cmd);
 }
 
 echo $message;
